@@ -1,0 +1,6 @@
+aioredis==0.3.1
+Fabric==1.13.2
+sanic==0.5.4
+paco==0.1.11
+aiohttp==2.1.0
+ujson==1.35

@@ -1,0 +1,13 @@
+stages:
+  - deploy
+
+deploy uat project:
+  stage: deploy
+
+  script:
+    - ls
+
+  allow_failure: false
+  when: on_success
+  only:
+    - /^Release.*$/
