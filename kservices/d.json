@@ -1,4 +1,11 @@
 {
+  "接收数据": {
+    "data": "数据参数"
+  },
+  "发送数据": {
+    "name": "服务名称",
+    "data": "发送的数据"
+  },
   "notice_add": {
     "msgtype": "notice|email|log|monitor|services",
     "notice": {

@@ -1,6 +1,7 @@
 import socket
 
 import aioamqp
+import msgpack
 
 
 class RabbitMQManager(object):
@@ -93,10 +94,60 @@ class RabbitMQManager(object):
             print(e)
 
 
-def init_rabbitmq():
+async def __init_rabbitmq():
     from utils.app import Application
     app = Application.current()
-    app.redis = RabbitMQManager(config=app.config.get("REDIS"))
+    r = RabbitMQManager(config=app.config.get("REDIS"))
+    conn = await r.conn()
+
+    service_name = app.config.get("NAME")
+    print(service_name)
+
+    # 初始化配置
+    cfg_ch = await conn.channel()
+    await cfg_ch.exchange_declare(service_name, 'fanout', durable=True)
+    q = await cfg_ch.queue_declare(exclusive=True)
+    await cfg_ch.queue_bind(
+        q['queue'],
+        service_name,
+        ''
+    )
+
+    async def __callback(ch, body, envelope, properties):
+        mth = envelope.routing_key.split(service_name).pop()
+
+        h = app.handler
+
+        if not hasattr(h, mth):
+            return
+
+        await getattr(h, mth)(msgpack.loads(body))
+
+        st, _res = await ch.basic_client_ack(envelope.delivery_tag)
+        if st:
+            await ch.basic_client_ack(envelope.delivery_tag)
+        else:
+            pass
+            # 执行失败,发送失败原因到其他的服务中，或者到其他的接口，数据库中
+
+
+    await cfg_ch.basic_consume(__callback, queue_name=q['queue'])
+
+    # 初始化应用
+    service_ch = await conn.channel()
+    await service_ch.exchange_declare('services', 'topic', durable=True)
+    await service_ch.queue_declare(queue_name=service_name, durable=True)
+    await service_ch.queue_bind(
+        service_name,
+        'services',
+        'services.{}.#'.format(service_name)
+    )
+
+    app.mq = r
+
+
+def init_rabbitmq():
+    asyncio.ensure_future(__init_rabbitmq())
 
 
 async def _p():
@@ -131,12 +182,10 @@ async def _c():
     )
 
     async def __callback(ch, body, envelope, properties):
-        print(ch)
-        print(body)
-        print(envelope.consumer_tag)
-        print(envelope.delivery_tag)
-        print(properties)
+        key = envelope.routing_key
+        exchange_name = envelope.exchange_name
 
+        print(body)
         await ch.basic_client_ack(envelope.delivery_tag)
         print()
         return
@@ -162,3 +211,21 @@ if __name__ == '__main__':
     # 每一个服务单独一个exchange(fanout)用来处理自身的配置信息,所有连接上的都会自动获取信息
     # 用排他性队列来处理配置，这样就不用关心你申请的是什么队列了
 
+'''
+channel ['_loop', '_send_channel_close_ok', '_set_waiter', '_write_frame', '_write_frame_awaiting_response',
+    'basic_cancel', 'basic_cancel_ok', 'basic_client_ack', 'basic_client_nack', 'basic_consume', 'basic_consume_ok',
+    'basic_deliver', 'basic_get', 'basic_get_empty', 'basic_get_ok', 'basic_publish', 'basic_qos', 'basic_qos_ok',
+    'basic_recover', 'basic_recover_async', 'basic_recover_ok', 'basic_reject', 'basic_server_ack', 'basic_server_nack',
+    'cancelled_consumers', 'channel_id', 'close', 'close_event', 'close_ok', 'confirm_select', 'confirm_select_ok',
+    'connection_closed', 'consumer_callbacks', 'consumer_queues', 'delivery_tag_iter', 'dispatch_frame', 'exchange',
+    'exchange_bind', 'exchange_bind_ok', 'exchange_declare', 'exchange_declare_ok', 'exchange_delete',
+    'exchange_delete_ok', 'exchange_unbind', 'exchange_unbind_ok', 'flow', 'flow_ok', 'is_open', 'last_consumer_tag',
+    'open', 'open_ok', 'protocol', 'publish', 'publisher_confirms', 'queue', 'queue_bind', 'queue_bind_ok',
+    'queue_declare', 'queue_declare_ok', 'queue_delete', 'queue_delete_ok', 'queue_purge', 'queue_purge_ok',
+ 'queue_unbind', 'queue_unbind_ok', 'response_future', 'server_basic_cancel', 'server_channel_close']
+
+envelope ['consumer_tag', 'delivery_tag', 'exchange_name', 'is_redeliver', 'routing_key']
+
+properties ['app_id', 'cluster_id', 'content_encoding', 'content_type', 'correlation_id', 'delivery_mode',
+    'expiration', 'headers', 'message_id', 'priority', 'reply_to', 'timestamp', 'type', 'user_id']
+'''

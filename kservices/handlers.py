@@ -3,6 +3,7 @@ import ujson as json
 from sanic.response import json as rep
 
 from utils.app import Application
+from utils.msg_util import MsgHandler
 
 
 def __notice_add(data):
@@ -73,3 +74,8 @@ async def ok(req):
         "redis_status": redis_status,
         "timers": app.timers.keys()
     })
+
+
+def init_handle():
+    app = Application.current()
+    app.handler = MsgHandler()
