@@ -1,0 +1,50 @@
+curl -X POST 'http://gw.api.taobao.com/router/rest' \
+-H 'Content-Type:application/x-www-form-urlencoded;charset=utf-8' \
+-d 'app_key=12129701' \
+-d 'format=json' \
+-d 'method=taobao.user.seller.get' \
+-d 'partner_id=apidoc' \
+-d 'session=1a3f92e6-e497-4efd-a6e3-995d4b655966' \
+-d 'sign=4F0848F880DDCDE59AACC71C8840B0A4' \
+-d 'sign_method=hmac' \
+-d 'timestamp=2017-06-16+03%3A23%3A19' \
+-d 'v=2.0' \
+-d 'fields=nick%2Csex'
+
+
+curl -X POST 'http://gw.api.taobao.com/router/rest' \
+-H 'Content-Type:application/x-www-form-urlencoded;charset=utf-8' \
+-d 'app_key=12129701' \
+-d 'format=json' \
+-d 'method=taobao.open.sms.sendvercode' \
+-d 'partner_id=apidoc' \
+-d 'sign=28F345E2223CE9424AA56C695B70F88A' \
+-d 'sign_method=hmac' \
+-d 'timestamp=2017-06-16+03%3A24%3A13' \
+-d 'v=2.0' \
+-d 'send_ver_code_request=null'
+
+
+curl -X POST 'http://gw.api.taobao.com/router/rest' \
+-H 'Content-Type:application/x-www-form-urlencoded;charset=utf-8' \
+-d 'app_key=12129701' \
+-d 'format=json' \
+-d 'method=taobao.logistics.orders.detail.get' \
+-d 'partner_id=apidoc' \
+-d 'session=23a82c49-d715-46a6-ba32-7022a7daa5a1' \
+-d 'sign=4C2B092205CD3138646E531D431723D1' \
+-d 'sign_method=hmac' \
+-d 'timestamp=2017-06-16+03%3A25%3A33' \
+-d 'v=2.0' \
+-d 'buyer_nick=zhangsan' \
+-d 'end_created=2000-01-01+00%3A00%3A00' \
+-d 'fields=tid%2Corder_code%2Cseller_nick%2Cbuyer_nick%2Citem_title%2Creceiver_location%2Cstatus%2Ctype%2Ccompany_name%2Ccreated%2Cmodified%2Cis_quick_cod_order%2Csub_tids%2Cis_split' \
+-d 'freight_payer=buyer' \
+-d 'page_no=1' \
+-d 'page_size=40' \
+-d 'receiver_name=name' \
+-d 'seller_confirm=yes' \
+-d 'start_created=2000-01-01+00%3A00%3A00' \
+-d 'status=CREATED' \
+-d 'tid=255222' \
+-d 'type=post'
