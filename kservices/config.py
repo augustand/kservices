@@ -16,6 +16,14 @@ class LocalConfig(Config):
     MONGODB_URI = "mongodb://localhost:27017"
     MONGODB_DB = "kservices"
 
+    RABBITMQ = dict(
+        host='localhost',
+        port=5672,
+        login="guest",
+        password="guest",
+        virtualhost="/"
+    )
+
 
 class DevConfig(Config):
     REDIS = {
