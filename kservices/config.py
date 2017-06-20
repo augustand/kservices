@@ -5,6 +5,7 @@ class Config(object):
     NAME = "wacai"
     DEBUG = True
     SECRET_KEY = '123456@#$%^&*('
+    PORT = 8080
 
 
 class LocalConfig(Config):
@@ -67,3 +68,6 @@ def init_config():
 
     app.config.from_object(_f)
     app.debug = _f.DEBUG
+
+    app.port = int(os.getenv("service_port", 8080))
+    app.workers = int(os.getenv("service_workers", 1))

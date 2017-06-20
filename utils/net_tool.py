@@ -19,11 +19,8 @@ def get_host_ip():
     获得主机本地IP
     :return:
     """
-    try:
-        import socket
-        return 1, socket.gethostbyname(socket.getfqdn(socket.gethostname()))
-    except Exception as e:
-        return 0, str(e)
+    import socket
+    return socket.gethostbyname(socket.getfqdn(socket.gethostname()))
 
 
 def get_host_name():

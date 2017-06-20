@@ -1,20 +1,21 @@
-from kservices.config import init_config
-from kservices.handlers import init_handle
-from kservices.urls import init_url
-from utils.app import Application
-from utils.redis_util import init_redis
+import asyncio
 
-app = Application.instance()
+import uvloop
 
-init_handle()
-init_config()
-init_url()
-init_redis()
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-if __name__ == "__main__":
-    import sys
-    from os.path import abspath as ap, dirname as dn
 
-    sys.path.append(dn(dn(ap(__file__))))
+def init_app():
+    from kservices.config import init_config
+    from kservices.handlers import init_handle
+    from kservices.urls import init_url
+    from utils.redis_util import init_redis
+    from utils.services_util import init_service
 
-    app.run(host="0.0.0.0", port=8001, workers=4, debug=False)
+    init_handle()
+    init_config()
+    init_url()
+    init_redis()
+
+    # 注册服务
+    init_service()
