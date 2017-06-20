@@ -4,6 +4,7 @@ import sys
 import ujson as json
 
 from utils import colors
+from utils.app import Application
 
 log = logging.getLogger(__name__)
 
