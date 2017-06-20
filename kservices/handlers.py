@@ -1,4 +1,7 @@
+import time
 import ujson as json
+from random import shuffle
+from uuid import uuid4
 
 from sanic.response import json as rep
 
@@ -46,6 +49,91 @@ async def notify_stop(req):
     from bussiness.notice import notify_stop_handle
     notify_stop_handle()
     return rep({"hello": "world"})
+
+
+async def services_post(req):
+    app = Application.current()
+    r = app.redis
+    _id = str(uuid4())
+    _id = "".join(shuffle(_id.split("-")))
+    errMsg = ""
+    status = "ok"
+    _now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+    await r.execute("hset", "services.ids", )
+    try:
+        _d = json.loads(req.body)
+        _d["id"] = _id
+        _d["create_time"] = _now
+        await r.execute("lpush", "services.post", json.dumps(_d))
+    except Exception as e:
+        errMsg = str(e)
+        status = "error"
+        _d = json.dumps({
+            "id": _id,
+            "create_time": _now,
+            "errMsg": errMsg,
+            "data": req.body
+        })
+        await r.execute("hset", "services.error", _id, _d)
+    return rep({"status": status, "id": _id, "errMsg": errMsg})
+
+
+async def services_get(req):
+    app = Application.current()
+    r = app.redis
+    try:
+        _id = req.raw_args.get("id")
+        errMsg = ""
+        status = "ok"
+        st, _res = await r.execute('hmget', 'services.get', *_id.split(","))
+        if not st:
+            errMsg = _res or ""
+            _res = ""
+    except Exception as e:
+        errMsg = str(e)
+        status = "error"
+        _res = ""
+
+    return rep({"status": status, "errMsg": errMsg, "data": _res or 0})
+
+
+async def services_properties_get(req):
+    app = Application.current()
+    r = app.redis
+    try:
+        _id = req.raw_args.get("id")
+        errMsg = ""
+        status = "ok"
+        st, _res = await r.execute('hmget', 'services.properties', *_id.split(","))
+        if not st:
+            errMsg = ""
+            _res = ""
+    except Exception as e:
+        errMsg = str(e)
+        status = "error"
+        _res = ""
+
+    return rep({"status": status, "errMsg": errMsg, "data": json.loads(_res or "{}")})
+
+
+async def services_params_get(req):
+    app = Application.current()
+    r = app.redis
+    try:
+        _id = req.raw_args.get("id")
+        errMsg = ""
+        status = "ok"
+        st, _res = await r.execute('hmget', 'services.params', *_id.split(","))
+        if not st:
+            errMsg = ""
+            _res = ""
+    except Exception as e:
+        errMsg = str(e)
+        status = "error"
+        _res = ""
+
+    return rep({"status": status, "errMsg": errMsg, "data": json.loads(_res or "{}")})
 
 
 async def ok(req):

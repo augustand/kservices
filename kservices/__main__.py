@@ -6,4 +6,4 @@ if __name__ == "__main__":
 
     from kservices.main import app
 
-    app.run(host="0.0.0.0", port=8110, workers=1, debug=True)
+    app.run(host="0.0.0.0", port=8110, workers=1, debug=False)
