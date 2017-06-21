@@ -21,23 +21,14 @@ async def init_zmq_server():
 
     sub = await aiozmq.rpc.serve_pubsub(
         Handler(),
-        subscribe='gateway.monitor',
+        subscribe='registry',
         bind='tcp://*:*',
         log_exceptions=True,
         timeout=1,
     )
 
     addr = list(sub.transport.bindings())[0]
-    st, res = await r.execute("hget", "services.url", "gateway.monitor")
-    assert st != 0
-
-    if not res:
-        res = {app.url: addr}
-    else:
-        res = json.loads(res)
-        res.update({app.url: addr})
-
-    await r.execute("hset", "services.url", "gateway.monitor", json.dumps(res))
+    await r.execute("hset", "services.url", "registry", addr)
 
 
 async def init_zmq_client():

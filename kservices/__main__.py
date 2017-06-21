@@ -19,8 +19,7 @@ def term_sig_handler(signum, frame):
 @click.option('--env', '-e', default='local', help=u'开发环境设置', show_default=True)
 @click.option('--host', '-h', default='0.0.0.0', help=u'主机', show_default=True)
 @click.option('--port', '-p', default=8080, help=u'端口', show_default=True)
-@click.option('--workers', '-w', default=1, help=u'进程数', show_default=True)
-def main(env, host, port, workers):
+def main(env, host, port):
     """启动服务"""
 
     from signal import signal, SIGTERM, SIGINT, SIGQUIT
@@ -37,7 +36,7 @@ def main(env, host, port, workers):
     from kservices.main import init_app
     init_app()
 
-    app.run(host="0.0.0.0", port=port, workers=workers, debug=False if env == 'pro' else True)
+    app.run(host="0.0.0.0", port=port, workers=1, debug=False if env == 'pro' else True)
 
 
 if __name__ == "__main__":

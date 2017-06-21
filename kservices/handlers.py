@@ -142,24 +142,44 @@ async def ok(req):
     :param req:
     :return:
     """
-    app = Application.current()
+    return rep({"status": "ok"})
 
+
+async def registry(req):
+    """
+    检测服务以及外部接口
+    :param req:
+    :return:
+    """
+    app = Application.current()
     r = app.redis
 
     try:
-        st, res = await r.execute('config_get')
-        if st:
-            redis_status = "ok"
-            print("redis config:\n", res)
-        else:
-            print("redis exception\n", res)
-            redis_status = res
+        _d = json.loads(req.body)
+        mth = _d.get("method")
+        data = _d.get("data")
+
+        if mth == "services.register":
+            service_name = data.get("name")
+            service_url = data.get("url")
+            try:
+                app.services[service_name].append(service_url)
+            except:
+                app.services[service_name] = [service_url]
+
+        if mth == "services.exception":
+            service_name = data.get("name")
+
+
+
+
+
     except Exception as e:
-        redis_status = str(e)
+        _st = str(e)
         print(e)
 
     return rep({
-        "redis_status": redis_status,
+        "redis_status": _st,
         "timers": app.timers.keys()
     })
 

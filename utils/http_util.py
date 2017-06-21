@@ -26,21 +26,21 @@ async def request_get(url, timeout=1, num_retry=3, **kwargs):
         return 0, err_msg
 
 
-async def __request_post(url, data, timeout=1, **kwargs):
+async def __request_post(url, data, timeout=1, headers=None, **kwargs):
     async with aiohttp.ClientSession() as session:
         try:
             with aiohttp.Timeout(timeout):
-                async with session.post(url, data=data, **kwargs) as response:
+                async with session.post(url, data=data, headers=headers, **kwargs) as response:
                     return 1, await response.text()
         except Exception as e:
             return 0, str(e)
 
 
-async def request_post(url, data, timeout=1, num_retry=3, **kwargs):
+async def request_post(url, data, timeout=1, num_retry=3, headers={"Content-Type": "application/json"}, **kwargs):
     i = num_retry
     err_msg = []
     while i > 0:
-        st, res = await __request_post(url, data, timeout=timeout, **kwargs)
+        st, res = await __request_post(url, data, timeout=timeout, headers=headers, **kwargs)
         if not st:
             i -= 1
             err_msg.append(res)
@@ -59,6 +59,5 @@ async def main():
 
 if __name__ == '__main__':
     import paco
-
 
     paco.run(main())
