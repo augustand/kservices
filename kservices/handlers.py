@@ -170,10 +170,6 @@ async def registry(req):
         if mth == "services.exception":
             service_name = data.get("name")
 
-
-
-
-
     except Exception as e:
         _st = str(e)
         print(e)

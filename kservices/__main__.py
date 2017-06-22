@@ -32,6 +32,7 @@ def main(env, host, port):
 
     app.env = env
     app.port = port
+    app.name = "score"
 
     from kservices.main import init_app
     init_app()
