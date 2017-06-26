@@ -51,10 +51,9 @@ def init_config():
     if not hasattr(app, "timers"):
         app.timers = {}
 
-    import os
     from kservices.const import Env
 
-    _e = os.environ.get("app_env", Env.local)
+    _e = app.env
     if _e == Env.local:
         _f = LocalConfig()
     elif _e == Env.dev:
@@ -68,6 +67,3 @@ def init_config():
 
     app.config.from_object(_f)
     app.debug = _f.DEBUG
-
-    app.port = int(os.getenv("service_port", 8080))
-    app.workers = int(os.getenv("service_workers", 1))

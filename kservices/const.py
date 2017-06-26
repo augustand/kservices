@@ -17,5 +17,5 @@ base_log_key_words = [
 class Env(object):
     dev = "dev"
     local = "local"
-    production = "production"
+    production = "pro"
     uat = "uat"

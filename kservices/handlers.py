@@ -53,14 +53,16 @@ async def notify_stop(req):
 
 async def services_post(req):
     app = Application.current()
+    app.score_wait_time = 0.01
+
     r = app.redis
-    _id = str(uuid4())
-    _id = "".join(shuffle(_id.split("-")))
+    _id = str(uuid4()).split("-")
+    shuffle(_id)
+    _id = "".join(_id)
     errMsg = ""
     status = "ok"
     _now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-    await r.execute("hset", "services.ids", )
     try:
         _d = json.loads(req.body)
         _d["id"] = _id
@@ -76,6 +78,7 @@ async def services_post(req):
             "data": req.body
         })
         await r.execute("hset", "services.error", _id, _d)
+
     return rep({"status": status, "id": _id, "errMsg": errMsg})
 
 
@@ -142,25 +145,8 @@ async def ok(req):
     :param req:
     :return:
     """
-    app = Application.current()
-
-    r = app.redis
-
-    try:
-        st, res = await r.execute('config_get')
-        if st:
-            redis_status = "ok"
-            print("redis config:\n", res)
-        else:
-            print("redis exception\n", res)
-            redis_status = res
-    except Exception as e:
-        redis_status = str(e)
-        print(e)
-
     return rep({
-        "redis_status": redis_status,
-        "timers": app.timers.keys()
+        "status": "ok"
     })
 
 
